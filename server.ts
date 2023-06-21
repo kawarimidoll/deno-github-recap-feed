@@ -141,9 +141,9 @@ const getEventKey = (entry: AtomEntry): string => {
   return "Unknown";
 };
 
-const p = (num: number, unit: string, suffix = "") => {
+const formatLine = (num: number, unit: string, suffix = "") => {
   if (num === 0) return "";
-  return tag("p", `${num}`, num <= 1 ? unit : plural(unit), suffix);
+  return tag("div", `${num}`, num <= 1 ? unit : plural(unit), suffix);
 };
 
 const genMainContent = (activities: { [key in string]?: number }) => {
@@ -168,24 +168,24 @@ const genMainContent = (activities: { [key in string]?: number }) => {
     "<![CDATA[",
     tag(
       "div",
-      p(createRepository, "repository", `created`),
-      p(createBranch, "branch", `created`),
-      p(deleteRepository, "repository", `deleted`),
-      p(deleteBranch, "branch", `deleted`),
-      p(fork, "fork", `created`),
-      p(push, "commit", `pushed`),
-      p(issuesOpened, "issue", `opened`),
-      p(issuesClosed, "issue", `closed`),
-      p(pullRequestOpened, "pull request", `opened`),
-      p(pullRequestClosed, "pull request", `closed`),
-      p(pullRequestMerged, "pull request", `merged`),
-      p(issueComment, "time", `commented to issue`),
-      p(pullRequestReviewComment, "time", `commented to pull request`),
-      p(star, "star", `created`),
-      p(watch, "watch", `created`),
-      p(unknown, "unknown", `activities found`),
-      tag("p", sample(messages) || "", sample(emojis) || ""),
+      formatLine(createRepository, "repository", `created`),
+      formatLine(createBranch, "branch", `created`),
+      formatLine(deleteRepository, "repository", `deleted`),
+      formatLine(deleteBranch, "branch", `deleted`),
+      formatLine(fork, "fork", `created`),
+      formatLine(push, "commit", `pushed`),
+      formatLine(issuesOpened, "issue", `opened`),
+      formatLine(issuesClosed, "issue", `closed`),
+      formatLine(pullRequestOpened, "pull request", `opened`),
+      formatLine(pullRequestClosed, "pull request", `closed`),
+      formatLine(pullRequestMerged, "pull request", `merged`),
+      formatLine(issueComment, "time", `commented to issue`),
+      formatLine(pullRequestReviewComment, "time", `commented to pull request`),
+      formatLine(star, "star", `created`),
+      formatLine(watch, "watch", `created`),
+      formatLine(unknown, "unknown", `activities found`),
     ),
+    tag("div", sample(messages) || "", sample(emojis) || ""),
     "]]>",
   ];
 };
