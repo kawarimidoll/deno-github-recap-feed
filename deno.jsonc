@@ -8,7 +8,7 @@
   },
   "tasks": {
     // general permissions
-    "run": "deno run --allow-env --allow-read --allow-net",
+    "run": "deno run --allow-env=DENO_DEPLOYMENT_ID --allow-read=index.html --allow-net=0.0.0.0,github.com",
     // runners
     "start": "deno task run --watch server.ts",
     // development
