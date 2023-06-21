@@ -143,7 +143,7 @@ const getEventKey = (entry: AtomEntry): string => {
 
 const formatLine = (num: number, unit: string, suffix = "") => {
   if (num === 0) return "";
-  return tag("div", `${num}`, num <= 1 ? unit : plural(unit), suffix);
+  return `${num} ${num <= 1 ? unit : plural(unit)} ${suffix}`;
 };
 
 const genMainContent = (activities: { [key in string]?: number }) => {
@@ -164,28 +164,33 @@ const genMainContent = (activities: { [key in string]?: number }) => {
   const watch = activities.Watch || 0;
   const unknown = activities.Unknown || 0;
 
+  const summary = [
+    formatLine(createRepository, "repository", "created"),
+    formatLine(createBranch, "branch", "created"),
+    formatLine(deleteRepository, "repository", "deleted"),
+    formatLine(deleteBranch, "branch", "deleted"),
+    formatLine(fork, "fork", "created"),
+    formatLine(push, "commit", "pushed"),
+    formatLine(issuesOpened, "issue", "opened"),
+    formatLine(issuesClosed, "issue", "closed"),
+    formatLine(pullRequestOpened, "pull request", "opened"),
+    formatLine(pullRequestClosed, "pull request", "closed"),
+    formatLine(pullRequestMerged, "pull request", "merged"),
+    formatLine(issueComment, "time", "commented to issue"),
+    formatLine(
+      pullRequestReviewComment,
+      "time",
+      "review commented to pull request",
+    ),
+    formatLine(star, "star", "created"),
+    formatLine(watch, "watch", "created"),
+    formatLine(unknown, "unknown", "activities found"),
+    `${sample(messages) || ""} ${sample(emojis) || ""}`,
+  ].filter((s) => s !== "").join("<br>");
+
   return [
     "<![CDATA[",
-    tag(
-      "div",
-      formatLine(createRepository, "repository", `created`),
-      formatLine(createBranch, "branch", `created`),
-      formatLine(deleteRepository, "repository", `deleted`),
-      formatLine(deleteBranch, "branch", `deleted`),
-      formatLine(fork, "fork", `created`),
-      formatLine(push, "commit", `pushed`),
-      formatLine(issuesOpened, "issue", `opened`),
-      formatLine(issuesClosed, "issue", `closed`),
-      formatLine(pullRequestOpened, "pull request", `opened`),
-      formatLine(pullRequestClosed, "pull request", `closed`),
-      formatLine(pullRequestMerged, "pull request", `merged`),
-      formatLine(issueComment, "time", `commented to issue`),
-      formatLine(pullRequestReviewComment, "time", `commented to pull request`),
-      formatLine(star, "star", `created`),
-      formatLine(watch, "watch", `created`),
-      formatLine(unknown, "unknown activity", `found`),
-    ),
-    tag("div", sample(messages) || "", sample(emojis) || ""),
+    tag("div", summary),
     "]]>",
   ];
 };
