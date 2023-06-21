@@ -10,8 +10,6 @@
     // general permissions
     "run": "deno run --allow-env --allow-read --allow-net",
     // runners
-    "dev": "deno task run --watch main.ts",
-    "main": "deno task run main.ts",
     "start": "deno task run --watch server.ts",
     // development
     "test": "deno test --allow-env --allow-read --allow-net --allow-none",
