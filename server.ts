@@ -183,7 +183,7 @@ const genMainContent = (activities: { [key in string]?: number }) => {
       formatLine(pullRequestReviewComment, "time", `commented to pull request`),
       formatLine(star, "star", `created`),
       formatLine(watch, "watch", `created`),
-      formatLine(unknown, "unknown", `activities found`),
+      formatLine(unknown, "unknown activity", `found`),
     ),
     tag("div", sample(messages) || "", sample(emojis) || ""),
     "]]>",
