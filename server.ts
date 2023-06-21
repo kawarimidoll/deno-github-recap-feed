@@ -170,7 +170,7 @@ const genMainContent = (activities: { [key in string]?: number }) => {
     formatLine(deleteRepository, "repository", "deleted"),
     formatLine(deleteBranch, "branch", "deleted"),
     formatLine(fork, "fork", "created"),
-    formatLine(push, "commit", "pushed"),
+    formatLine(push, "time", "pushed"),
     formatLine(issuesOpened, "issue", "opened"),
     formatLine(issuesClosed, "issue", "closed"),
     formatLine(pullRequestOpened, "pull request", "opened"),
