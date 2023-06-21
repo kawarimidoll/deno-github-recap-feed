@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>GitHub Recap Feed</title>
+  <meta property="og:url" content="https://github-recap-feed.deno.dev/" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="GitHub Recap Feed" />
+  <meta property="og:description" content="RSS feed summarizing daily activity on GitHub." />
+  <meta property="og:site_name" content="GitHub Recap Feed" />
+  <meta property="og:image" content="https://cdn.jsdelivr.net/gh/twitter/twemoji@13.1.0/assets/72x72/1f340.png" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.min.css" />
+  <link rel="icon" type="image/png" href="https://cdn.jsdelivr.net/gh/twitter/twemoji@13.1.0/assets/72x72/1f340.png" />
+  <style>
+    body {
+      text-align: center;
+    }
+    input {
+      display: inline;
+    }
+    img {
+      height: 1em;
+      width: 1em;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>
+    GitHub Recap Feed
+    <img decoding="async" aria-label="icon" height="72" width="72" src="https://cdn.jsdelivr.net/gh/twitter/twemoji@13.1.0/assets/72x72/1f340.png" />
+  </h1>
+  <div>
+    <p>RSS feed summarizing daily activity on GitHub.</p>
+    <p>This feed is a daily summary of <code>https://github.com/[username].atom</code>.</p>
+    <p>Access to the path /github-username directory or input username of GitHub here ↓</p>
+    <form id="form">
+      <div>
+        <input id="input-handle" name="input-handle" aria-label="input-handle" required autofocus placeholder="username to feed" />
+        <input type="submit" id="submit-button" name="submit-button" aria-label="submit-button" value="Generate feed" />
+      </div>
+    </form>
+    <p>
+      <a title="https://github.com/kawarimidoll/deno-github-recap-feed" target="_blank" rel="noopener noreferrer nofollow" href="https://github.com/kawarimidoll/deno-github-recap-feed">https://github.com/kawarimidoll/deno-github-recap-feed</a>
+    </p>
+  </div>
+  <script>
+    const form = document.getElementById("form");
+    form.addEventListener("submit", event => {
+      event.preventDefault();
+
+      document.getElementById("submit-button").value = "Calculating...";
+      [...document.getElementsByTagName("input")].forEach(e => e.disabled = true);
+
+      const url = new URL(window.location.href);
+      url.pathname = document.getElementById("input-handle").value;
+      window.location.href = url.toString();
+    });
+
+    window.addEventListener('pageshow', () => {
+      document.getElementById("submit-button").value = "Generate feed";
+      [...document.getElementsByTagName("input")].forEach(e => e.disabled = false);
+    });
+  </script>
+</body>
+
+</html>
