@@ -251,6 +251,8 @@ serve(async (request: Request) => {
 
   // console.log(result);
   const userLink = `https://github.com/${userName}`;
+  const description = `${userName}'s daily activities in GitHub`;
+  const lastBuildDate = feedEntries.at(0)?.publishedRaw;
 
   const prefix = '<?xml version="1.0" encoding="UTF-8"?>';
   const res = tag(
@@ -264,21 +266,25 @@ serve(async (request: Request) => {
     },
     tag(
       "channel",
-      tag("title", `GitHub activities daily summary (${userName})`),
+      tag("title", `GitHub Recap Feed (${userName})`),
       `<atom:link href="${
         sanitize(href)
       }" rel="self" type="application/rss+xml" />`,
       tag("link", userLink),
-      tag("description", `${userName}'s activities in GitHub`),
-      tag("lastBuildDate", feedEntries.at(0)?.publishedRaw || ""),
+      tag("description", description),
+      lastBuildDate ? tag("lastBuildDate", lastBuildDate) : "",
       tag("sy:updatePeriod", "daily"),
       ...result.map(({ date, activities }) =>
         tag(
           "item",
-          tag("title", `${userName}'s activities in ${date}`),
+          tag("title", `${description} on ${date}`),
           tag("description", ...genMainContent(activities)),
           tag("link", userLink),
-          tag("guid", { isPermaLink: "false" }, date),
+          tag(
+            "guid",
+            { isPermaLink: "false" },
+            `github-recap-feed-${userName}-${date}`,
+          ),
           tag("pubDate", date),
           tag("dc:creator", userName),
         )
