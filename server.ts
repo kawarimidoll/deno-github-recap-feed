@@ -97,9 +97,8 @@ const getGithubFeed = async (userName: string): Promise<AtomEntry[]> => {
   return feed.entries || [];
 };
 const getActivities = (entry: AtomEntry): string => {
-  const { id } = entry;
+  const eventKey = entry.id.match(":([a-zA-Z]+)Event")?.at(1) || "";
   const titleValue = entry.title.value;
-  const eventKey = id.split("/")[0].split(":")[2].replace("Event", "");
   if (
     ["Push", "IssueComment", "Fork", "PullRequestReviewComment"].includes(
       eventKey,
@@ -107,42 +106,26 @@ const getActivities = (entry: AtomEntry): string => {
   ) {
     return eventKey;
   }
-  if (eventKey === "Create") {
+  if (eventKey === "Create" || eventKey === "Delete") {
     if (titleValue.includes("repository")) {
-      return "CreateRepository";
+      return eventKey + "Repository";
     }
     if (titleValue.includes("branch")) {
-      return "CreateBranch";
+      return eventKey + "Branch";
     }
     if (titleValue.includes("tag")) {
-      return "CreateTag";
+      return eventKey + "Tag";
     }
   }
-  if (eventKey === "Delete") {
-    if (titleValue.includes("repository")) {
-      return "DeleteRepository";
-    }
-    if (titleValue.includes("branch")) {
-      return "DeleteBranch";
-    }
-  }
-  if (eventKey === "Issues") {
+  if (eventKey === "Issues" || eventKey === "PullRequest") {
     if (titleValue.includes("opened")) {
-      return "IssuesOpened";
+      return eventKey + "Opened";
     }
     if (titleValue.includes("closed")) {
-      return "IssuesClosed";
-    }
-  }
-  if (eventKey === "PullRequest") {
-    if (titleValue.includes("opened")) {
-      return "PullRequestOpened";
-    }
-    if (titleValue.includes("closed")) {
-      return "PullRequestClosed";
+      return eventKey + "Closed";
     }
     if (titleValue.includes("merged")) {
-      return "PullRequestMerged";
+      return eventKey + "Merged";
     }
   }
   if (eventKey === "Watch") {
