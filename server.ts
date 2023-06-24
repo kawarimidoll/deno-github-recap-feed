@@ -12,6 +12,8 @@ import {
   parseFeed,
 } from "https://deno.land/x/rss@0.5.8/mod.ts";
 
+const isDev = !Deno.env.get("DENO_DEPLOYMENT_ID");
+
 const messages = [
   "All right!",
   "Excellent!",
@@ -173,7 +175,6 @@ const genMainContent = (activities: Activities) => {
   ];
 };
 
-const isDev = !Deno.env.get("DENO_DEPLOYMENT_ID");
 serve(async (request: Request) => {
   const { href, pathname } = new URL(request.url);
 
@@ -197,6 +198,18 @@ serve(async (request: Request) => {
 
   const userName = pathname.replace(/^\//, "");
   const feedEntries = await getGithubFeed(userName);
+  if (isDev) {
+    console.log(
+      feedEntries.map(({ id, title, links, content }) => {
+        return {
+          id,
+          title: title.value,
+          link: links[0].href,
+          content: content.value,
+        };
+      }),
+    );
+  }
 
   const todayString = new Date().toISOString().split("T")[0] as DateString;
 
