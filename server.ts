@@ -77,7 +77,10 @@ type AtomEntry = {
 };
 
 type Activities = {
-  [key in string]?: number;
+  [key in string]?: {
+    title: string;
+    url: string;
+  }[];
 };
 type Summary = {
   date: DateString;
@@ -98,53 +101,72 @@ const getGithubFeed = async (userName: string): Promise<AtomEntry[]> => {
   }
   return feed.entries || [];
 };
-const getActivities = (entry: AtomEntry): string => {
+const getActivities = (entry: AtomEntry) => {
   const eventKey = entry.id.match(":([a-zA-Z]+)Event")?.at(1) || "";
   const titleValue = entry.title.value;
-  if (
-    ["Push", "IssueComment", "Fork", "PullRequestReviewComment"].includes(
-      eventKey,
-    )
-  ) {
-    return eventKey;
+  const repoName = titleValue.replace(/^.* |#.*$/, "");
+  const link = entry.links.at(0)?.href || "";
+  const repoUrl = `https://github.com/${repoName}`;
+  const actUrl = repoUrl;
+  const actTitle = repoName;
+  if (["Push", "Fork"].includes(eventKey)) {
+    return { eventKey, actUrl, actTitle };
   }
   if (eventKey === "Create" || eventKey === "Delete") {
+    const actUrl = repoUrl;
+    const actTitle = repoName;
     if (titleValue.includes("repository")) {
-      return eventKey + "Repository";
+      return { eventKey: eventKey + "Repository", actUrl, actTitle };
     }
     if (titleValue.includes("branch")) {
-      return eventKey + "Branch";
+      return { eventKey: eventKey + "Branch", actUrl, actTitle };
     }
     if (titleValue.includes("tag")) {
-      return eventKey + "Tag";
+      return { eventKey: eventKey + "Tag", actUrl, actTitle };
     }
   }
+  if (eventKey === "IssueComment" || eventKey === "PullRequestReviewComment") {
+    const actUrl = link;
+    const actTitle = titleValue.replace(/^.* /, "");
+    return { eventKey, actUrl, actTitle };
+  }
   if (eventKey === "Issues" || eventKey === "PullRequest") {
+    const actUrl = link;
+    const num = link.match(/\/(issues|pull)\/(\d+)/)?.at(2) || "";
+    const actTitle = `${repoName}#${num}`;
     if (titleValue.includes("opened")) {
-      return eventKey + "Opened";
+      return { eventKey: eventKey + "Opened", actUrl, actTitle };
     }
     if (titleValue.includes("closed")) {
-      return eventKey + "Closed";
+      return { eventKey: eventKey + "Closed", actUrl, actTitle };
     }
     if (titleValue.includes("merged")) {
-      return eventKey + "Merged";
+      return { eventKey: eventKey + "Merged", actUrl, actTitle };
     }
   }
   if (eventKey === "Watch") {
     if (titleValue.includes("star")) {
-      return "Star";
+      return { eventKey: "Star", actUrl, actTitle };
     }
-    return eventKey;
+    return { eventKey, actUrl, actTitle };
   }
-  // console.log({ eventKey, titleValue });
-  return "Unknown";
+
+  if (isDev) {
+    console.log({ eventKey, titleValue });
+  }
+
+  return { eventKey: "Unknown", actUrl, actTitle };
 };
 
 const genMainContent = (activities: Activities) => {
   const formatLine = (key: string, unit: string, suffix = "") => {
-    const num = activities[key] || 0;
-    if (num === 0) return "";
-    return `${num} ${num <= 1 ? unit : plural(unit)} ${suffix}`;
+    const activityList = activities[key];
+    if (!activityList) return "";
+    const num = activityList.length;
+    const links = activityList.map(({ title, url }) =>
+      tag("a", { href: url, title }, title)
+    ).join(", ");
+    return `${num} ${num <= 1 ? unit : plural(unit)} ${suffix}: ${links}`;
   };
 
   const summary = [
@@ -224,19 +246,22 @@ serve(async (request: Request) => {
       continue;
     }
 
-    const eventKey = getActivities(entry);
+    const { eventKey, actUrl, actTitle } = getActivities(entry);
     const index = result.findIndex((r) => r.date === date);
     if (index === -1) {
       result.push({
         date,
         activities: {
-          [eventKey]: 1,
+          [eventKey]: [{ url: actUrl, title: actTitle }],
         },
       });
     } else if (result[index]?.activities[eventKey]) {
-      result[index].activities[eventKey]! += 1;
+      result[index].activities[eventKey]!.push({
+        url: actUrl,
+        title: actTitle,
+      });
     } else {
-      result[index].activities[eventKey] = 1;
+      result[index].activities[eventKey] = [{ url: actUrl, title: actTitle }];
     }
   }
 
