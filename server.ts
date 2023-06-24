@@ -198,7 +198,7 @@ const genMainContent = (activities: Activities) => {
 };
 
 serve(async (request: Request) => {
-  const { href, pathname } = new URL(request.url);
+  const { href, pathname, searchParams } = new URL(request.url);
 
   if (isDev) {
     console.log(pathname);
@@ -269,6 +269,7 @@ serve(async (request: Request) => {
   const userLink = `https://github.com/${userName}`;
   const description = `${userName}'s daily activities in GitHub`;
   const lastBuildDate = feedEntries.at(0)?.publishedRaw;
+  const debugMode = searchParams.get("debug") === "true";
 
   const prefix = '<?xml version="1.0" encoding="UTF-8"?>';
   const res = tag(
@@ -288,7 +289,7 @@ serve(async (request: Request) => {
       tag("link", userLink),
       tag("description", description),
       lastBuildDate ? tag("lastBuildDate", lastBuildDate) : "",
-      ...result.map(({ date, activities }) =>
+      ...result.map(({ date, activities }, idx) =>
         tag(
           "item",
           tag("title", `${description} on ${date}`),
@@ -297,7 +298,9 @@ serve(async (request: Request) => {
           tag(
             "guid",
             { isPermaLink: "false" },
-            `github-recap-feed-${userName}-${date}`,
+            idx === 0 && debugMode
+              ? `github-recap-feed-${userName}-${new Date().toISOString()}`
+              : `github-recap-feed-${userName}-${date}`,
           ),
           tag("pubDate", date),
           tag("dc:creator", userName),
