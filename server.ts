@@ -74,11 +74,12 @@ type AtomEntry = {
   [key: string]: unknown;
 };
 
+type Activities = {
+  [key in string]?: number;
+};
 type Summary = {
   date: DateString;
-  activities: {
-    [key in string]?: number;
-  };
+  activities: Activities;
 };
 
 const isAtom = (feed: Feed): feed is Atom => {
@@ -112,6 +113,9 @@ const getActivities = (entry: AtomEntry): string => {
     }
     if (titleValue.includes("branch")) {
       return "CreateBranch";
+    }
+    if (titleValue.includes("tag")) {
+      return "CreateTag";
     }
   }
   if (eventKey === "Delete") {
@@ -151,50 +155,31 @@ const getActivities = (entry: AtomEntry): string => {
   return "Unknown";
 };
 
-const formatLine = (num: number, unit: string, suffix = "") => {
-  if (num === 0) return "";
-  return `${num} ${num <= 1 ? unit : plural(unit)} ${suffix}`;
-};
-
-const genMainContent = (activities: { [key in string]?: number }) => {
-  const createRepository = activities.CreateRepository || 0;
-  const createBranch = activities.CreateBranch || 0;
-  const deleteRepository = activities.DeleteRepository || 0;
-  const deleteBranch = activities.DeleteBranch || 0;
-  const fork = activities.Fork || 0;
-  const push = activities.Push || 0;
-  const issuesOpened = activities.IssuesOpened || 0;
-  const issuesClosed = activities.IssuesClosed || 0;
-  const issueComment = activities.IssueComment || 0;
-  const pullRequestOpened = activities.PullRequestOpened || 0;
-  const pullRequestClosed = activities.PullRequestClosed || 0;
-  const pullRequestMerged = activities.PullRequestMerged || 0;
-  const pullRequestReviewComment = activities.PullRequestReviewComment || 0;
-  const star = activities.Star || 0;
-  const watch = activities.Watch || 0;
-  const unknown = activities.Unknown || 0;
+const genMainContent = (activities: Activities) => {
+  const formatLine = (key: string, unit: string, suffix = "") => {
+    const num = activities[key] || 0;
+    if (num === 0) return "";
+    return `${num} ${num <= 1 ? unit : plural(unit)} ${suffix}`;
+  };
 
   const summary = [
-    formatLine(createRepository, "repository", "created"),
-    formatLine(createBranch, "branch", "created"),
-    formatLine(deleteRepository, "repository", "deleted"),
-    formatLine(deleteBranch, "branch", "deleted"),
-    formatLine(fork, "fork", "created"),
-    formatLine(push, "time", "pushed"),
-    formatLine(issuesOpened, "issue", "opened"),
-    formatLine(issuesClosed, "issue", "closed"),
-    formatLine(pullRequestOpened, "pull request", "opened"),
-    formatLine(pullRequestClosed, "pull request", "closed"),
-    formatLine(pullRequestMerged, "pull request", "merged"),
-    formatLine(issueComment, "time", "commented to issue"),
-    formatLine(
-      pullRequestReviewComment,
-      "time",
-      "review commented to pull request",
-    ),
-    formatLine(star, "star", "created"),
-    formatLine(watch, "watch", "created"),
-    formatLine(unknown, "unknown", "activities found"),
+    formatLine("CreateRepository", "repository", "created"),
+    formatLine("CreateBranch", "branch", "created"),
+    formatLine("CreateTag", "tag", "created"),
+    formatLine("DeleteRepository", "repository", "deleted"),
+    formatLine("DeleteBranch", "branch", "deleted"),
+    formatLine("Fork", "fork", "created"),
+    formatLine("Push", "time", "pushed"),
+    formatLine("IssuesOpened", "issue", "opened"),
+    formatLine("IssuesClosed", "issue", "closed"),
+    formatLine("PullRequestOpened", "pull request", "opened"),
+    formatLine("PullRequestClosed", "pull request", "closed"),
+    formatLine("PullRequestMerged", "pull request", "merged"),
+    formatLine("IssueComment", "time", "commented"),
+    formatLine("PullRequestReviewComment", "time", "reviewed"),
+    formatLine("Star", "star", "created"),
+    formatLine("Watch", "watch", "created"),
+    formatLine("Unknown", "unknown activity ", "found"),
     `${sample(messages) || ""} ${sample(emojis) || ""}`,
   ].filter((s) => s !== "").join("<br>");
 
