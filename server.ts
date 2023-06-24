@@ -41,8 +41,8 @@ const emojis = [
 
 type Year = `${number}${number}${number}${number}`;
 type Month = `${0 | 1}${number}`;
-type Day = `${0 | 1 | 2 | 3}${number}`;
-type Hour = `${0 | 1}${number}`;
+type Day = `${0 | 1 | 2}${number}` | "30" | "31";
+type Hour = `${0}${number}` | "10" | "11" | "12";
 type Minute = `${0 | 1 | 2 | 3 | 4 | 5}${number}`;
 type Second = `${0 | 1 | 2 | 3 | 4 | 5}${number}`;
 type DateString = `${Year}-${Month}-${Day}`;
