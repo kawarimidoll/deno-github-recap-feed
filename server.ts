@@ -106,18 +106,18 @@ const getEventKey = (entry: AtomEntry): string => {
     return eventKey;
   }
   if (eventKey === "Create") {
-    if (value.includes("created")) {
+    if (value.includes("repository")) {
       return "CreateRepository";
     }
-    if (value.includes("created")) {
+    if (value.includes("branch")) {
       return "CreateBranch";
     }
   }
   if (eventKey === "Delete") {
-    if (value.includes("deleted")) {
+    if (value.includes("repository")) {
       return "DeleteRepository";
     }
-    if (value.includes("deleted")) {
+    if (value.includes("branch")) {
       return "DeleteBranch";
     }
   }
