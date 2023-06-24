@@ -95,8 +95,9 @@ const getGithubFeed = async (userName: string): Promise<AtomEntry[]> => {
   }
   return feed.entries || [];
 };
-const getEventKey = (entry: AtomEntry): string => {
-  const { id, title: { value } } = entry;
+const getActivities = (entry: AtomEntry): string => {
+  const { id } = entry;
+  const titleValue = entry.title.value;
   const eventKey = id.split("/")[0].split(":")[2].replace("Event", "");
   if (
     ["Push", "IssueComment", "Fork", "PullRequestReviewComment"].includes(
@@ -106,47 +107,47 @@ const getEventKey = (entry: AtomEntry): string => {
     return eventKey;
   }
   if (eventKey === "Create") {
-    if (value.includes("repository")) {
+    if (titleValue.includes("repository")) {
       return "CreateRepository";
     }
-    if (value.includes("branch")) {
+    if (titleValue.includes("branch")) {
       return "CreateBranch";
     }
   }
   if (eventKey === "Delete") {
-    if (value.includes("repository")) {
+    if (titleValue.includes("repository")) {
       return "DeleteRepository";
     }
-    if (value.includes("branch")) {
+    if (titleValue.includes("branch")) {
       return "DeleteBranch";
     }
   }
   if (eventKey === "Issues") {
-    if (value.includes("opened")) {
+    if (titleValue.includes("opened")) {
       return "IssuesOpened";
     }
-    if (value.includes("closed")) {
+    if (titleValue.includes("closed")) {
       return "IssuesClosed";
     }
   }
   if (eventKey === "PullRequest") {
-    if (value.includes("opened")) {
+    if (titleValue.includes("opened")) {
       return "PullRequestOpened";
     }
-    if (value.includes("closed")) {
+    if (titleValue.includes("closed")) {
       return "PullRequestClosed";
     }
-    if (value.includes("merged")) {
+    if (titleValue.includes("merged")) {
       return "PullRequestMerged";
     }
   }
   if (eventKey === "Watch") {
-    if (value.includes("star")) {
+    if (titleValue.includes("star")) {
       return "Star";
     }
     return eventKey;
   }
-  // console.log({ eventKey, value });
+  // console.log({ eventKey, titleValue });
   return "Unknown";
 };
 
@@ -242,7 +243,7 @@ serve(async (request: Request) => {
       continue;
     }
 
-    const eventKey = getEventKey(entry);
+    const eventKey = getActivities(entry);
     const index = result.findIndex((r) => r.date === date);
     if (index === -1) {
       result.push({
