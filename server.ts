@@ -58,9 +58,18 @@ type AtomEntry = {
   title: {
     // event description (e.g. 'kawarimidoll pushed to master in kawarimidoll/kawarimidoll')
     value: string;
-    // 'html'
-    type: string;
+    type: "html";
   };
+  content: {
+    // event description dom
+    value: string;
+    type: "html";
+  };
+  links: {
+    href: string;
+    rel: "alternate";
+    type: "text/html";
+  }[];
   // other data
   [key: string]: unknown;
 };
