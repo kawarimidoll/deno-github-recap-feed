@@ -96,11 +96,7 @@ const genMainContent = (activities: Activities) => {
     `${sample(MESSAGES) || ""} ${sample(EMOJIS) || ""}`,
   ].filter((s) => s !== "").join("<br>");
 
-  return [
-    "<![CDATA[",
-    tag("div", summary),
-    "]]>",
-  ];
+  return ["<![CDATA[", tag("div", summary), "]]>"];
 };
 
 serve(async (request: Request) => {
@@ -160,22 +156,14 @@ serve(async (request: Request) => {
       continue;
     }
 
-    const { eventKey, actUrl, actTitle } = getActivities(entry);
+    const { eventKey, actUrl: url, actTitle: title } = getActivities(entry);
     const index = result.findIndex((r) => r.date === date);
     if (index === -1) {
-      result.push({
-        date,
-        activities: {
-          [eventKey]: [{ url: actUrl, title: actTitle }],
-        },
-      });
+      result.push({ date, activities: { [eventKey]: [{ url, title }] } });
     } else if (result[index]?.activities[eventKey]) {
-      result[index].activities[eventKey]!.push({
-        url: actUrl,
-        title: actTitle,
-      });
+      result[index].activities[eventKey]!.push({ url, title });
     } else {
-      result[index].activities[eventKey] = [{ url: actUrl, title: actTitle }];
+      result[index].activities[eventKey] = [{ url, title }];
     }
   }
 
