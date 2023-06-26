@@ -1,6 +1,9 @@
 {
   "imports": {
-    "std/": "https://deno.land/std@0.191.0/"
+    "std/": "https://deno.land/std@0.192.0/",
+    "plural": "https://deno.land/x/deno_plural@2.0.0/mod.ts",
+    "tag": "https://deno.land/x/markup_tag@0.4.0/mod.ts",
+    "rss": "https://deno.land/x/rss@0.5.8/mod.ts"
   },
   "lint-staged": {
     "*": "deno lint && deno fmt",

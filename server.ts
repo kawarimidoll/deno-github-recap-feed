@@ -1,106 +1,12 @@
-import { serve } from "https://deno.land/std@0.192.0/http/server.ts";
-import { sample } from "https://deno.land/std@0.192.0/collections/sample.ts";
-import { plural } from "https://deno.land/x/deno_plural@2.0.0/mod.ts";
-import {
-  sanitize,
-  tagNoVoid as tag,
-} from "https://deno.land/x/markup_tag@0.4.0/mod.ts";
-import {
-  Atom,
-  Feed,
-  FeedType,
-  parseFeed,
-} from "https://deno.land/x/rss@0.5.8/mod.ts";
+import { serve } from "std/http/server.ts";
+import { sample } from "std/collections/sample.ts";
+import { plural } from "plural";
+import { sanitize, tagNoVoid as tag } from "tag";
 
-const isDev = !Deno.env.get("DENO_DEPLOYMENT_ID");
+import { EMOJIS, IS_DEV, MESSAGES } from "./constants.ts";
+import type { Activities, AtomEntry, DateString, Summary } from "./types.ts";
+import { getGithubFeed } from "./get_github_feed.ts";
 
-const messages = [
-  "All right!",
-  "Excellent!",
-  "Go for it!",
-  "Good job!",
-  "Happy hacking!",
-  "Keep going!",
-  "Keep it up!",
-  "Nice work!",
-  "Super-duper!",
-  "That's it!",
-  "That's the way!",
-  "Way to go!",
-  "You are awesome!",
-  "You are doing great!",
-  "You are unstoppable!",
-  "You can do it!",
-  "You've got this!",
-];
-
-// deno-fmt-ignore
-const emojis = [
-  "👏", "👊", "👍", "👌", "🤙", "🎉", "🎊", "🔥", "🚀",
-  "🤩", "🥳", "🤗", "🤟", "🏆", "🎖️", "✨", "🌟", "🌠",
-  "🌈", "💖", "💘", "💝", "💞", "💟", "💌", "💓", "💕",
-];
-
-type Year = `${number}${number}${number}${number}`;
-type Month = `${0 | 1}${number}`;
-type Day = `${0 | 1 | 2}${number}` | "30" | "31";
-type Hour = `${0}${number}` | "10" | "11" | "12";
-type Minute = `${0 | 1 | 2 | 3 | 4 | 5}${number}`;
-type Second = `${0 | 1 | 2 | 3 | 4 | 5}${number}`;
-type DateString = `${Year}-${Month}-${Day}`;
-type DateTimeString = `${DateString}T${Hour}:${Minute}:${Second}Z`;
-
-type AtomEntry = {
-  // event id (e.g. 'tag:github.com,2008:SampleEvent/1234567890')
-  id: string;
-  // published date
-  publishedRaw: DateTimeString;
-  // updated date
-  updatedRaw: DateTimeString;
-  title: {
-    // event description (e.g. 'kawarimidoll pushed to master in kawarimidoll/kawarimidoll')
-    value: string;
-    type: "html";
-  };
-  content: {
-    // event description dom
-    value: string;
-    type: "html";
-  };
-  links: {
-    href: string;
-    rel: "alternate";
-    type: "text/html";
-  }[];
-  // other data
-  [key: string]: unknown;
-};
-
-type Activities = {
-  [key in string]?: {
-    title: string;
-    url: string;
-  }[];
-};
-type Summary = {
-  date: DateString;
-  activities: Activities;
-};
-
-const isAtom = (feed: Feed): feed is Atom => {
-  return feed.type === FeedType.Atom;
-};
-
-const getGithubFeed = async (userName: string): Promise<AtomEntry[]> => {
-  const response = await fetch(`https://github.com/${userName}.atom`);
-  const xml = await response.text();
-  const feed = await parseFeed(xml) as Atom;
-
-  if (!isAtom(feed)) {
-    return [];
-  }
-  return feed.entries || [];
-};
 const getActivities = (entry: AtomEntry) => {
   const eventKey = entry.id.match(":([a-zA-Z]+)Event")?.at(1) || "";
   const titleValue = entry.title.value;
@@ -151,7 +57,7 @@ const getActivities = (entry: AtomEntry) => {
     return { eventKey, actUrl, actTitle };
   }
 
-  if (isDev) {
+  if (IS_DEV) {
     console.log({ eventKey, titleValue });
   }
 
@@ -187,7 +93,7 @@ const genMainContent = (activities: Activities) => {
     formatLine("Star", "star", "created"),
     formatLine("Watch", "watch", "created"),
     formatLine("Unknown", "unknown activity ", "found"),
-    `${sample(messages) || ""} ${sample(emojis) || ""}`,
+    `${sample(MESSAGES) || ""} ${sample(EMOJIS) || ""}`,
   ].filter((s) => s !== "").join("<br>");
 
   return [
@@ -200,7 +106,7 @@ const genMainContent = (activities: Activities) => {
 serve(async (request: Request) => {
   const { href, pathname, searchParams } = new URL(request.url);
 
-  if (isDev) {
+  if (IS_DEV) {
     console.log(pathname);
   }
 
@@ -220,7 +126,7 @@ serve(async (request: Request) => {
 
   const userName = pathname.replace(/^\//, "");
   const feedEntries = await getGithubFeed(userName);
-  if (isDev) {
+  if (IS_DEV) {
     console.log(
       feedEntries.map(({ id, title, links, content }) => {
         return {
