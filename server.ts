@@ -126,6 +126,14 @@ serve(async (request: Request) => {
 
   const userName = pathname.replace(/^\//, "");
   const feedEntries = await getGithubFeed(userName);
+
+  if (!feedEntries) {
+    return new Response("User feed not found", {
+      status: 404,
+      headers: { "content-type": "text/plain" },
+    });
+  }
+
   if (IS_DEV) {
     console.log(
       feedEntries.map(({ id, title, links, content }) => {
